@@ -1,6 +1,7 @@
 ﻿@page "/cobros"
 @page "/cobros/{CobrosId:int}"
 
+
 @using Models
 @using BLL
 
@@ -68,17 +69,17 @@
                             {
                                 @foreach (var item in cobros.Detalle)
                                 {
-                            <tr>
-                                @if (item.Pagar == false)
-                                {
-                                    <td>@VentasBLL.Buscar(item.VentasId).VentaId</td>
-                                    <td>@VentasBLL.Buscar(item.VentasId).Fecha.ToString("dd/MM/yyyy")</td>
-                                    <td>@VentasBLL.Buscar(item.VentasId).Monto.ToString("N2")</td>
-                                    <td>@VentasBLL.Buscar(item.VentasId).Balance.ToString("N2")</td>
-                                    <td>@(item.Pagar == true ? VentasBLL.Buscar(item.VentasId).Balance : item.Cobrado)</td>
-                                    <td><input type="checkbox" class="form-check-input" @onchange="(() => Cobrar(item)) " /></td>
-                                }
-                            </tr>
+                                    <tr>
+                                        @if (item.Pagar == false)
+                                        {
+                                            <td>@VentasBLL.Buscar(item.VentasId).VentaId</td>
+                                            <td>@VentasBLL.Buscar(item.VentasId).Fecha.ToString("dd/MM/yyyy")</td>
+                                            <td>@VentasBLL.Buscar(item.VentasId).Monto.ToString("N2")</td>
+                                            <td>@VentasBLL.Buscar(item.VentasId).Balance.ToString("N2")</td>
+                                            <td>@(item.Pagar == true ? VentasBLL.Buscar(item.VentasId).Balance : item.Cobrado)</td>
+                                            <td><input type="checkbox" class="form-check-input" @onchange="(() => Cobrar(item)) " /></td>
+                                        }
+                                    </tr>
                                 }
                             }
                         </tbody>
@@ -99,7 +100,7 @@
                     <div class="form-group col-6">
                         <label>Total Cobrado</label>
                         <span class="form-control">
-                            @cobros.Detalle.Sum(c => c.Cobrado) 
+                            @cobros.Detalle.Sum(c => c.Cobrado)
                         </span>
                     </div>
                 </div>
@@ -124,9 +125,13 @@
 </EditForm>
 @code {
     public Cobros cobros = new Cobros();
+    public Ventas ventas = new Ventas();
+    private Ventas Venta;
 
     [Parameter]
     public int CobrosId { get; set; }
+    [Parameter]
+    public int VentaId { get; set; }
 
     List<CobrosDetalle> ventasPendientes = new List<CobrosDetalle>();
     public double Balance { get; set; }
@@ -139,6 +144,9 @@
         Buscar();
         if (CobrosId > 0)
             Buscar(CobrosId);
+
+        if (VentaId > 0)
+            Buscar(VentaId);
     }
 
 
@@ -168,18 +176,25 @@
     public void Buscar(int id)
     {
 
-        var encontrado =CobrosBLL.Buscar(id);
+        var encontrado = CobrosBLL.Buscar(id);
 
         if (encontrado != null)
             this.cobros = encontrado;
 
+    }
+    public void BuscarVentas(int id)
+    {
+        var encontrado = VentasBLL.Buscar(VentaId);
+
+        if (encontrado != null)
+            this.Venta = encontrado;
     }
 
 
     private void Guardar()
     {
         bool guardado;
-        
+
         cobros.Monto = cobros.Detalle.Sum(c => c.Cobrado);
         cobros.Detalle.RemoveAll(d => d.Cobrado > 0);
 
@@ -187,6 +202,17 @@
 
         if (guardado)
             Nuevo();
+        
+
+        else
+        {
+            toast.ShowError("No se pudo guardar");
+        }
+
+
+
+
+
     }
 
     public void Buscar()
@@ -198,7 +224,8 @@
             if (encontrado != null)
                 this.cobros = encontrado;
 
-            //toast.ShowWarning("No encontrado");
+            toast.ShowSuccess("Encontrado");
+            
         }
     }
     public void EliminarDetalle(CobrosDetalle detalle)
@@ -208,7 +235,7 @@
 
     private void Cobrar(CobrosDetalle detalle)
     {
-        if(detalle.Cobrado == 0)
+        if (detalle.Cobrado == 0)
             detalle.Cobrado = VentasBLL.Buscar(detalle.VentasId).Balance;
         else
         {

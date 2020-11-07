@@ -1,5 +1,109 @@
-﻿<h3>C_Ventas</h3>
+﻿@page "/ConsultaVentas"
+
+@using Models
+@using BLL
+
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-4">
+                <div class="form-group">
+                    <label>Filtro</label>
+                    <select class="form-control" @bind="Filtro">
+                        <option value="0">Opciones</option>
+                        <option value="1">VentaID</option>
+                        <option value="2">ClienteId</option>
+                        <option value="2">Nombre Cliente</option>
+
+                    </select>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label>criterio</label>
+                    <input type="text" class="form-control" @bind="Criterio" placeholder="Escriba un criterio" />
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="form-group">
+                    <label> </label>
+                    <button type="button" class="btn btn-lg btn-primary btn-block" @onclick="Consultar">Consultar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>VentaID</th>
+                    <th>ClienteId</th>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Balance</th>
+
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListaConsulta)
+                {
+                <tr>
+                    <td>@item.VentaId</td>
+                    <td>@item.ClienteId</td>
+                    <td>@item.Fecha</td>
+                    <td>@item.Monto</td>
+                    <td>@item.Balance</td>
+
+
+                    
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
 
 @code {
+    public List<Ventas> ListaConsulta { get; set; } = new List<Ventas>();
+    public int Filtro { get; set; }
+    public string Criterio { get; set; } = string.Empty;
+
+
+    public void Consultar()
+    {
+        if (Criterio != string.Empty)
+        {
+            switch (Filtro)
+            {
+                case 0:
+                    ListaConsulta = VentasBLL.GetList(p => true);
+                    break;
+                case 1:
+                    int id = Convert.ToInt32(Criterio);
+                    ListaConsulta = VentasBLL.GetList(p => p.VentaId == id);
+                    break;
+                case 2:
+                    int clienteid = Convert.ToInt32(Criterio);
+                    ListaConsulta = VentasBLL.GetList(p => p.ClienteId == clienteid);
+                    break;
+                case 3:
+                    double Monto = Convert.ToDouble(Criterio);
+                    ListaConsulta = VentasBLL.GetList(p => p.Monto == Monto);
+                    break;
+
+            }
+
+        }
+        else
+        {
+            ListaConsulta = VentasBLL.GetList(p => true);
+        }
+
+    }
+
 
 }
