@@ -1,0 +1,105 @@
+﻿@page "/ConsultaCobros"
+
+@using Models
+@using BLL
+
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-4">
+                <div class="form-group">
+                    <label>Filtro</label>
+                    <select class="form-control" @bind="Filtro">
+                        <option value="0">Opciones</option>
+                        <option value="1">ID</option>
+                        <option value="2">ClienteId</option>
+                        
+                    </select>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label>criterio</label>
+                    <input type="text" class="form-control" @bind="Criterio" placeholder="Escriba un criterio" />
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="form-group">
+                    <label> </label>
+                    <button type="button" class="btn btn-lg btn-primary btn-block" @onclick="Consultar">Consultar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ClienteId</th>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                   
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListaConsulta)
+                {
+                <tr>
+                    <td>@item.CobrosId</td>
+                    <td>@item.ClienteId</td>
+                    <td>@item.Fecha</td>
+                    <td>@item.Monto</td>
+
+                    <td><a href="@($"Cobros/{item.CobrosId}")">Ver</a></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+</div>
+
+
+
+@code {
+    public List<Cobros> ListaConsulta { get; set; } = new List<Cobros>();
+    public int Filtro { get; set; }
+    public string Criterio { get; set; } = string.Empty;
+    
+
+    public void Consultar()
+    {
+        if (Criterio != string.Empty)
+        {
+            switch (Filtro)
+            {
+                case 0:
+                    ListaConsulta = CobrosBLL.GetList(p => true);
+                    break;
+                case 1:
+                    int id = Convert.ToInt32(Criterio);
+                    ListaConsulta = CobrosBLL.GetList(p => p.CobrosId == id);
+                    break;
+                case 2:
+                    int clienteid = Convert.ToInt32(Criterio);
+                    ListaConsulta = CobrosBLL.GetList(p => p.ClienteId == clienteid);
+                    break;
+                case 3:
+                    double Monto = Convert.ToDouble(Criterio);
+                    ListaConsulta = CobrosBLL.GetList(p => p.Monto == Monto);
+                    break;
+                    
+            }
+
+        }
+        else
+        {
+            ListaConsulta = CobrosBLL.GetList(p => true);
+        }
+       
+    }
+    
+
+}
